@@ -1,0 +1,1 @@
+"""Advanced snake game package."""
