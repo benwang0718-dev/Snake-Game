@@ -6,7 +6,7 @@ if __package__ is None or __package__ == "":
     if str(project_root) not in sys.path:
         sys.path.insert(0, str(project_root))
 
-from PyQt6.QtCore import Qt, QTimer
+from PyQt6.QtCore import QPoint, Qt, QTimer
 from PyQt6.QtGui import QColor, QFont, QPainter, QPen
 from PyQt6.QtWidgets import QApplication, QWidget
 
@@ -144,7 +144,7 @@ class SnakeWindow(QWidget):
             self.draw_cell(painter, bx, by, QColor(*BONUS_FOOD_COLOR), top, padding=2)
 
         rx, ry = self.state.hazard
-        self.draw_cell(painter, rx, ry, QColor(*HAZARD_COLOR), top, padding=7)
+        self.draw_hazard(painter, rx, ry, top)
 
         hx, hy = self.state.snake[0]
         self.draw_cell(painter, hx, hy, QColor(*SNAKE_HEAD_COLOR), top, padding=3)
@@ -156,6 +156,39 @@ class SnakeWindow(QWidget):
         py = top + y * CELL_SIZE + padding
         size = CELL_SIZE - padding * 2
         painter.fillRect(px, py, size, size, color)
+
+    def draw_hazard(self, painter: QPainter, x: int, y: int, top: int) -> None:
+        px = x * CELL_SIZE
+        py = top + y * CELL_SIZE
+
+        painter.save()
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+
+        skull_color = QColor(244, 240, 232)
+        outline_color = QColor(*HAZARD_COLOR)
+        feature_color = QColor(45, 18, 18)
+
+        painter.setPen(QPen(outline_color, 2))
+        painter.setBrush(skull_color)
+        painter.drawEllipse(px + 4, py + 2, CELL_SIZE - 8, CELL_SIZE - 10)
+        painter.drawRoundedRect(px + 7, py + 15, CELL_SIZE - 14, 9, 2, 2)
+
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(feature_color)
+        painter.drawEllipse(px + 8, py + 9, 5, 6)
+        painter.drawEllipse(px + 15, py + 9, 5, 6)
+        painter.drawConvexPolygon(
+            QPoint(px + 14, py + 14),
+            QPoint(px + 11, py + 18),
+            QPoint(px + 17, py + 18),
+        )
+
+        painter.setBrush(outline_color)
+        painter.fillRect(px + 10, py + 18, 1, 5, outline_color)
+        painter.fillRect(px + 13, py + 18, 1, 5, outline_color)
+        painter.fillRect(px + 16, py + 18, 1, 5, outline_color)
+
+        painter.restore()
 
 
 def main() -> None:
